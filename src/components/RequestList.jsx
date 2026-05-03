@@ -2,7 +2,7 @@ import React from 'react';
 import RequestCard from './RequestCard';
 
 export default function RequestList({ items, role, onDelete }) {
-  // ПОЧЕМУ проверка на пустой массив? Требование БАЗА (стр. 3 ТЗ). 
+  // ПОЧЕМУ проверка на пустой массив? Требование БАЗА. 
   // Мы показываем сообщение-заглушку, чтобы интерфейс не был "мёртвым".
   if (items.length === 0) {
     return <div className="empty-msg">Реестр пуст. Добавьте первую заявку!</div>;

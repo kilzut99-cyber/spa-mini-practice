@@ -5,7 +5,7 @@ import FilterPanel from './components/FilterPanel';
 import RequestList from './components/RequestList';
 import './App.css';
 
-// ПОЧЕМУ вне компонента? Константы не должны пересоздаваться в памяти при каждом рендере (ТЗ, стр. 3).
+// ПОЧЕМУ вне компонента? Константы не должны пересоздаваться в памяти при каждом рендере.
 const INITIAL_DATA = [
   { id: 1, title: "Турбина ВД", physics: "CFD", date: "2026-05-01" },
   { id: 2, title: "Опора вала", physics: "Механика", date: "2026-05-02" }
@@ -15,7 +15,7 @@ const STORAGE_KEY = "cae-requests-app";
 
 function App() {
   // ПОЧЕМУ функция-инициализатор в useState? 
-  // Она выполняется один раз при старте, извлекая данные из LocalStorage (ТЗ, стр. 5).
+  // Она выполняется один раз при старте, извлекая данные из LocalStorage.
   const [requests, setRequests] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -51,12 +51,12 @@ function App() {
   };
 
   const handleDelete = (id) => {
-    // ПОЧЕМУ .filter()? Мы создаем НОВЫЙ массив, соблюдая табу на мутацию стейта (ТЗ, стр. 4).
+    // ПОЧЕМУ .filter()? Мы создаем НОВЫЙ массив, соблюдая табу на мутацию стейта.
     setRequests(prev => prev.filter(r => r.id !== id));
   };
 
   // ПОЧЕМУ логика фильтрации здесь? App.js — владелец данных. 
-  // Бизнес-логика живет рядом с данными (ТЗ, стр. 4).
+  // Бизнес-логика живет рядом с данными.
   const filteredRequests = filter === "Все" 
     ? requests 
     : requests.filter(r => r.physics === filter);

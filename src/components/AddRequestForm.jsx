@@ -6,10 +6,10 @@ export default function AddRequestForm({ onAdd }) {
 
   const handleSubmit = (e) => {
     // ПОЧЕМУ preventDefault? Чтобы страница не перезагружалась. 
-    // В SPA мы обрабатываем данные через JS, не прерывая работу приложения (ТЗ, стр. 3).
+    // В SPA мы обрабатываем данные через JS, не прерывая работу приложения.
     e.preventDefault();
 
-    // ВАЛИДАЦИЯ (ТЗ, стр. 3): .trim() убирает пробелы. Пустые задачи не создаем.
+    // ВАЛИДАЦИЯ: .trim() убирает пробелы. Пустые задачи не создаем.
     if (!title.trim()) return;
 
     onAdd({ title, physics, date: new Date().toLocaleDateString() });

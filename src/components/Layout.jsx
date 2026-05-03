@@ -14,7 +14,7 @@ export default function Layout({ title, children, isOnline }) {
 
       {/* ПОЧЕМУ children? Это механизм композиции React. 
           Layout задаёт каркас (шапку, футер), а контент вкладывается снаружи. 
-          Это избавляет от копипаста структуры на каждой странице (ТЗ, стр. 5). */}
+          Это избавляет от копипаста структуры на каждой странице */}
       <main className="layout-main">
         {children}
       </main>

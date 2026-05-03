@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default function FilterPanel({ activeFilter, onFilterChange }) {
-  // Категории согласно ТЗ (стр. 6)
+  // Категории согласно ТЗ 
   const categories = ["Все", "Механика", "CFD", "Тепло"];
 
   return (
@@ -9,7 +9,7 @@ export default function FilterPanel({ activeFilter, onFilterChange }) {
       {categories.map(cat => (
         <button 
           key={cat}
-          // ПОЧЕМУ активная кнопка выделена? Требование JUNIOR (стр. 4).
+          // ПОЧЕМУ активная кнопка выделена? Требование JUNIOR.
           className={activeFilter === cat ? "filter-btn active" : "filter-btn"}
           onClick={() => onFilterChange(cat)}
         >
