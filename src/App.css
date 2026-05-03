@@ -1,38 +1,120 @@
-.App {
-  text-align: center;
+/* --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ (ПОЧЕМУ? Для удобной смены темы всего КЦ в одном месте) --- */
+:root {
+  --1c-blue: #0054a5;     /* Основной цвет систем 1С */
+  --1c-yellow: #ffcc00;   /* Акцентный цвет (логотипы) */
+  --bg-gray: #f3f3f3;     /* Фон промышленного интерфейса */
+  --border-color: #c0c0c0; /* Цвет границ таблиц и полей */
+  --status-new: #e3f2fd;  /* Цвет для новых заявок */
+  --accent-red: #d32f2f;  /* Цвет для удаления (опасное действие) */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  background-color: var(--bg-gray);
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif; /* ПОЧЕМУ? Стандартный шрифт делового ПО */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* --- ШАПКА ПРИЛОЖЕНИЯ (LAYOUT) --- */
+.app-header {
+  background-color: var(--1c-blue);
+  color: white;
+  padding: 10px 20px;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  border-bottom: 3px solid var(--1c-yellow);
+}
+
+/* --- ПАНЕЛЬ ФИЛЬТРОВ И РОЛИ (JUNIOR) --- */
+.toolbar {
+  background: white;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  gap: 15px;
+}
+
+.filter-btn {
+  padding: 5px 15px;
+  border: 1px solid var(--border-color);
+  background: #eee;
+  cursor: pointer;
+}
+
+.filter-btn.active {
+  background: var(--1c-yellow);
+  font-weight: bold;
+  border-color: #999;
+}
+
+/* --- ФОРМА ДОБАВЛЕНИЯ ЗАЯВКИ (JUNIOR) --- */
+.add-form {
+  background: white;
+  padding: 20px;
+  margin: 10px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.add-form input, .add-form select {
+  padding: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.add-form button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+/* --- РЕЕСТР-ТАБЛИЦА (БАЗА / КУРСОВОЙ) --- */
+.registry-table {
+  width: 100%;
+  border-collapse: collapse; /* ПОЧЕМУ? Убирает двойные рамки, делая таблицу строгой */
+  background: white;
+}
+
+.registry-table th {
+  background-color: #e9ecef;
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.registry-table td {
+  border: 1px solid var(--border-color);
+  padding: 10px;
+}
+
+.del-btn {
+  color: var(--accent-red);
+  background: none;
+  border: 1px solid var(--accent-red);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.del-btn:hover {
+  background: var(--accent-red);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+/* --- ОПОВЕЩЕНИЯ (PRO / BOM API) --- */
+.offline-alert {
+  background-color: #fff3cd;
+  color: #856404;
+  text-align: center;
+  padding: 8px;
+  font-weight: bold;
+  border-bottom: 1px solid #ffeeba;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.empty-msg {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-style: italic;
 }

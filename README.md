@@ -1,70 +1,113 @@
-# Getting Started with Create React App
+# 📄 ОТЧЕТ ПО ПРАКТИЧЕСКОЙ РАБОТЕ: «**spa-mini-practice**»
+## Тема: ПОДГОТОВКА К КУРСОВОЙ РАБОТЕ. АРХИТЕКТУРА **SPA**, ИНТЕГРАЦИЯ КОМПОНЕНТОВ 
+##  Цель работы
+собрать полноценный мини-**SPA** из нескольких React-компонентов, применив на практике все ключевые
+концепции лекции: однонаправленный поток данных, подъём состояния (`lifting state up`), управляемые формы,
+передачу `callback`-функций и композицию через `children`. Результат этой работы — прямой прототип
+архитектуры Вашего курсового проекта.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Студент:** Александр Зализко  
+**Среда разработки:** Visual Studio Code  
+**Архитектура:** React SPA (**Functional Components, Hooks, BOM API**)
+**Тема курсовой:** Менеджер задач виртуальных испытаний (**To-Do+**)
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 1. Связь с курсовым проектом
+Данная практическая работа является **архитектурным фундаментом** моего курсового проекта. Реализованный прототип «Персональной ленты» полностью перенесен на бизнес-логику Консалтингового центра:
+*   **TaskCard (бывший ItemCard):** Прямой прообраз карточки заявки на виртуальное испытание (CAE).
+*   **AddRequestForm:** Прототип формы постановки задачи инженером-конструктором.
+*   **Offline-first:** Реализация отслеживания сети гарантирует сохранность данных при сбоях на производстве.
+*   **UI-стилистика:** Интерфейс выполнен в строгом корпоративном стиле (аналог **1С:Документооборот**), что соответствует требованиям к инженерному ПО.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📂 2. Структура проекта (Декомпозиция)
+Проект разбит на независимые компоненты для соблюдения принципа **Single Responsibility**:
+*   `src/components/Layout.jsx`: Каркас приложения (обертка) с использованием `children`.
+*   `src/components/AddRequestForm.jsx`: Управляемая форма ввода новых заявок.
+*   `src/components/FilterPanel.jsx`: Панель фильтрации по стадиям (Новая, В расчете, Завершено).
+*   `src/components/RequestList.jsx`: Компонент-контейнер для рендеринга списка через `.map()`.
+*   `src/components/RequestCard.jsx`: Презентационный компонент одной строки реестра.
+*   `App.js`: Единственный источник истины (Single Source of Truth), логика `localStorage` и `BOM`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🎤 3. Interview Corner (Ответы на вопросы)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. Что такое «однонаправленный поток данных» в React? Почему это удобно?
+Данные всегда передаются строго от Родителя к Потоку через `props`. Это исключает ситуацию, когда компоненты хаотично меняют данные друг друга. Это удобно, так как делает отладку прозрачной: если в таблице ошибка, мы ищем её только в источнике данных (App.js).
 
-### `npm run build`
+### 2. Что такое lifting state up? Приведите пример из работы.
+Это «подъем состояния» к общему предку. В моей работе поиск и список заявок живут в разных компонентах, но зависят от одних данных. Я поднял состояние `requests` в `App.js`, чтобы все компоненты работали с актуальной базой одновременно.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 3. Как дочерний компонент сообщает родителю о событии? Почему нельзя изменить state родителя напрямую?
+Дочерний компонент вызывает **callback-функцию**, переданную ему родителем через `props` (например, `onDelete`). Напрямую менять state родителя нельзя, так как это нарушит принцип инкапсуляции и React не сможет корректно отследить изменения для перерисовки интерфейса.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 4. Что такое управляемый компонент (controlled component)? Зачем нужен атрибут value у input?
+Это элемент формы, значение которого полностью контролируется состоянием (`state`) React. Атрибут `value` связывает отображаемый текст с переменной в памяти. Это необходимо для мгновенной валидации и реализации «живого» поиска по реестру.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 5. Что такое паттерн «компонент-обёртка» (wrapper component)? Как работает children?
+Это компонент (у меня `Layout.jsx`), который создает общую визуальную рамку. Свойство `children` — это механизм композиции, позволяющий вкладывать любой контент внутрь обертки, избавляя от дублирования кода шапки и подвала.
 
-### `npm run eject`
+### 6. Почему в React предпочтительна композиция, а не наследование?
+Композиция позволяет собирать интерфейс из мелких деталей как конструктор LEGO. Наследование создает жесткие иерархии, которые крайне сложно менять. В React проще вложить один компонент в другой, чем пытаться выстроить их «родственные» связи.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 7. Зачем нужен useEffect для работы с localStorage? Что такое «побочный эффект»?
+Работа с `localStorage` (диском) — это действие вне контроля React, т.е. «побочный эффект». `useEffect` позволяет синхронизировать состояние приложения с памятью браузера строго после того, как интерфейс был успешно отрисован.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🛠 4. Порядок выполнения в Visual Studio Code
+1.  **Инициализация:** `npx create-react-app spa-mini-practice`.
+2.  **Структура:** Создание папки `src/components/` и 5 функциональных компонентов.
+3.  **Стилизация:** Настройка `App.css` под стандарт 1С (использование CSS-переменных `:root`).
+4.  **Логика:**
+    *   Реализация `useState` с функцией-инициализатором (try/catch).
+    *   Реализация `useEffect` для сохранения данных и мониторинга сети (`navigator.onLine`).
+    *   Настройка фильтрации и удаления через `.filter()`.
+5.  **Тестирование:** Проверка RBAC (ролей) и работы LocalStorage при перезагрузке.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 🛠 5. Основная структура репозитория (основные файлы)
+spa-mini-practice/
+├── screenshots/           # Мои 3 изображения
+│   ├── Скриншот №1.jpg
+│   ├── Скриншот №2.jpg
+│   └── Скриншот №3.jpg
+├── src/
+│   ├── components/        # Все 5 файлов (.jsx)
+│   ├── App.js             # Главный файл с логикой
+│   ├── App.css            # Стиль 1С / Индустрия 4.0
+│   └── index.js
+├── README.md              # Ответы на 7 вопросов + описание связи с курсовой
+└── package.json
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 📸 6. Фотоотчет и визуализация (Screenshots)
 
-### Code Splitting
+Для подтверждения работоспособности всех уровней системы (**БАЗА**, **JUNIOR**, **PRO**), в корне проекта создана папка `/screenshots`, содержащая следующие контрольные снимки:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 🖼 Скриншот №1: «Пустой реестр и Offline-режим»
+*   **Действие:** Очистка массива данных + переключение в режим *Offline* во вкладке *Network* (F12).
+*   **Визуальные маркеры:** 
+    *   Текст-заглушка: *«Реестр пуст. Добавьте первую заявку!»*.
+    *   Системное уведомление: Желтый баннер *«Режим Offline»* в шапке приложения.
+*   **Цель:** Демонстрация обработки пустых состояний и интеграции с **BOM API** (уровень PRO).
 
-### Analyzing the Bundle Size
+### 🖼 Скриншот №2: «Добавление новой заявки (Lifting State Up)»
+*   **Действие:** Заполнение формы (напр. *«Расчет лопатки турбины»*, категория *«CFD»*) и нажатие кнопки «Создать».
+*   **Визуальные маркеры:** 
+    *   Заполненные управляемые поля ввода.
+    *   Мгновенное появление новой строки в таблице реестра.
+*   **Цель:** Подтверждение работы **управляемой формы** и успешного «подъема состояния» до родительского компонента (уровень JUNIOR).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 🖼 Скриншот №3: «Фильтрация и Ролевая модель (RBAC)»
+*   **Действие:** Добавление нескольких задач + активация фильтра *«Механика»* + переключение роли на *«Engineer»*.
+*   **Визуальные маркеры:** 
+    *   В таблице отображаются только отфильтрованные записи.
+    *   Кнопки **«Удалить» скрыты** для роли инженера.
+    *   Активная кнопка фильтра выделена стилистически (стиль 1С).
+*   **Цель:** Демонстрация бизнес-логики, условного рендеринга и фильтрации данных в реальном времени (уровень PRO).
