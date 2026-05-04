@@ -1,110 +1,134 @@
-/* --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ (ПОЧЕМУ? Для удобной смены темы всего КЦ в одном месте) --- */
+/* --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ (ПОЧЕМУ? Чтобы менять тему всего КЦ одной правкой) --- */
 :root {
-  --1c-blue: #0054a5;     /* Основной цвет систем 1С */
-  --1c-yellow: #ffcc00;   /* Акцентный цвет (логотипы) */
-  --bg-gray: #f3f3f3;     /* Фон промышленного интерфейса */
-  --border-color: #c0c0c0; /* Цвет границ таблиц и полей */
-  --status-new: #e3f2fd;  /* Цвет для новых заявок */
-  --accent-red: #d32f2f;  /* Цвет для удаления (опасное действие) */
+  --1c-blue: #0054a5;         /* Основной цвет заголовков */
+  --1c-yellow: #ffcc00;       /* Цвет активных элементов */
+  --bg-industrial: #f0f0f0;   /* Серый фон цеха/офиса */
+  --border-grey: #c0c0c0;     /* Цвет рамок таблиц */
+  --text-main: #333333;
+  
+  /* Цвета статусов  */
+  --status-new: #e3f2fd;      /* Светло-синий */
+  --status-process: #fff3e0;  /* Песочный */
+  --status-done: #e8f5e9;     /* Светло-зеленый */
+  --status-error: #ffebee;    /* Бледный красный */
 }
 
 body {
-  background-color: var(--bg-gray);
+  background-color: var(--bg-industrial);
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif; /* ПОЧЕМУ? Стандартный шрифт делового ПО */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-main);
 }
 
-/* --- ШАПКА ПРИЛОЖЕНИЯ (LAYOUT) --- */
+/* --- LAYOUT (Оболочка) --- */
+.layout-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .app-header {
   background-color: var(--1c-blue);
   color: white;
   padding: 10px 20px;
+  border-bottom: 3px solid var(--1c-yellow);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.layout-main {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* --- ROLE TOOLBAR (RBAC Визуализация) --- */
+.role-toolbar {
+  background: white;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border: 1px solid var(--border-grey);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 3px solid var(--1c-yellow);
 }
 
-/* --- ПАНЕЛЬ ФИЛЬТРОВ И РОЛИ (JUNIOR) --- */
-.toolbar {
-  background: white;
-  padding: 15px 20px;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  gap: 15px;
-}
-
-.filter-btn {
-  padding: 5px 15px;
-  border: 1px solid var(--border-color);
-  background: #eee;
-  cursor: pointer;
-}
-
-.filter-btn.active {
+.role-toolbar button {
   background: var(--1c-yellow);
+  border: 1px solid #999;
+  padding: 5px 12px;
+  cursor: pointer;
   font-weight: bold;
-  border-color: #999;
 }
 
-/* --- ФОРМА ДОБАВЛЕНИЯ ЗАЯВКИ (JUNIOR) --- */
+/* --- ENGINEERING FORM  --- */
 .add-form {
   background: white;
   padding: 20px;
-  margin: 10px 0;
-  display: flex;
+  border: 1px solid var(--border-grey);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
 .add-form input, .add-form select {
   padding: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-grey);
+  font-size: 0.9rem;
 }
 
 .add-form button {
   background-color: #4caf50;
   color: white;
   border: none;
-  padding: 8px 15px;
+  font-weight: bold;
   cursor: pointer;
 }
 
-/* --- РЕЕСТР-ТАБЛИЦА (БАЗА / КУРСОВОЙ) --- */
+/* --- РЕЕСТР ТАБЛИЦА (ПОЧЕМУ table? Это стандарт для инженерных данных) --- */
 .registry-table {
   width: 100%;
-  border-collapse: collapse; /* ПОЧЕМУ? Убирает двойные рамки, делая таблицу строгой */
+  border-collapse: collapse; /* Убирает двойные линии, создавая строгий вид */
   background: white;
+  font-size: 0.9rem;
 }
 
 .registry-table th {
   background-color: #e9ecef;
-  border: 1px solid var(--border-color);
-  padding: 10px;
+  border: 1px solid var(--border-grey);
+  padding: 12px 10px;
   text-align: left;
-  font-size: 0.9rem;
+  color: var(--1c-blue);
 }
 
 .registry-table td {
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-grey);
   padding: 10px;
+  vertical-align: middle;
 }
 
-.del-btn {
-  color: var(--accent-red);
-  background: none;
-  border: 1px solid var(--accent-red);
-  cursor: pointer;
-  font-size: 12px;
+/* Стилизация строк по статусу */
+.status-новая { background-color: var(--status-new); }
+.status-в\ расчете { background-color: var(--status-process); }
+.status-завершено { background-color: var(--status-done); }
+
+.model-meta {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
 }
 
-.del-btn:hover {
-  background: var(--accent-red);
-  color: white;
-}
-
-/* --- ОПОВЕЩЕНИЯ (PRO / BOM API) --- */
+/* --- АЛЕРТЫ --- */
 .offline-alert {
-  background-color: #fff3cd;
+  background: #fff3cd;
   color: #856404;
   text-align: center;
   padding: 8px;
@@ -112,9 +136,16 @@ body {
   border-bottom: 1px solid #ffeeba;
 }
 
-.empty-msg {
-  text-align: center;
-  padding: 40px;
-  color: #888;
-  font-style: italic;
+.del-btn {
+  color: #d32f2f;
+  background: none;
+  border: 1px solid #d32f2f;
+  border-radius: 3px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.del-btn:hover {
+  background: #d32f2f;
+  color: white;
 }
