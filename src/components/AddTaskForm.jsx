@@ -17,7 +17,7 @@ export default function AddTaskForm({ onAdd }) {
       return;
     }
 
-    // Безопасный хэш для кириллицы (Задача 3.1 ТЗ)
+    // Безопасный хэш для кириллицы 
     const geoHash = `GEO-${Math.random().toString(36).substr(2, 4).toUpperCase()}-${Date.now().toString().slice(-2)}`;
 
     onAdd({ ...formData, geoHash });

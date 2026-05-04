@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default function FilterPanel({ activeFilter, onFilterChange }) {
-  // Категории согласно ТЗ 
+  // Категории 
   const categories = ["Все", "Механика", "CFD", "Тепло"];
 
   return (
