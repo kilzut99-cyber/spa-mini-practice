@@ -1,9 +1,13 @@
 import React from 'react';
 
-export default function TaskCard({ id, title, priority, deadline, status, lod, geoHash, role, onDelete, onStatusChange }) {
+export default function TaskCard({ 
+  id, title, priority = "Medium", deadline, status = "НОВАЯ", 
+  lod, geoHash, role, onDelete, onStatusChange 
+}) {
   
-  // ПОЧЕМУ расчет здесь? Задача 5 ТЗ требует расчет стоимости. 
-  // Мы имитируем это: цена зависит от сложности (LOD) и приоритета.
+  // Добавляем проверку, чтобы toLowerCase() не вызывался у undefined
+  const statusClass = status ? status.toLowerCase() : 'new';
+
   const calculateCost = () => {
     const base = lod === 'High' ? 1500 : 800;
     const multiplier = priority === 'High' ? 2 : 1;
@@ -11,21 +15,20 @@ export default function TaskCard({ id, title, priority, deadline, status, lod, g
   };
 
   return (
-    <tr className={`task-row status-${status.toLowerCase()}`}>
+    <tr className={`task-row status-${statusClass}`}>
       <td><small>{id}</small></td>
       <td>
         <strong>{title}</strong>
         <div className="model-meta">Hash: {geoHash} | LOD: {lod}</div>
       </td>
-      <td><span className={`priority-badge ${priority}`}>{priority}</span></td>
+      {/* Тоже добавляем защиту для priority */}
+      <td><span className={`priority-badge ${priority ? priority.toLowerCase() : ''}`}>{priority}</span></td>
       <td>{deadline}</td>
       <td>{calculateCost()} $</td>
       <td>
         <select 
           value={status} 
           onChange={(e) => onStatusChange(id, e.target.value)}
-          /* ПОЧЕМУ disabled? Реализация RBAC (стр. 12 ТЗ). Инженер видит задачу, 
-             но менять статус "Завершено" может только Консультант (Админ). */
           disabled={role === 'Engineer'}
         >
           <option value="НОВАЯ">Новая</option>
