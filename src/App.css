@@ -1,151 +1,200 @@
-/* --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ (ПОЧЕМУ? Чтобы менять тему всего КЦ одной правкой) --- */
+/* 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ (Industry 4.0 Palette) */
 :root {
-  --1c-blue: #0054a5;         /* Основной цвет заголовков */
-  --1c-yellow: #ffcc00;       /* Цвет активных элементов */
-  --bg-industrial: #f0f0f0;   /* Серый фон цеха/офиса */
-  --border-grey: #c0c0c0;     /* Цвет рамок таблиц */
-  --text-main: #333333;
+  --1c-blue: #0054a5;        /* Основной цвет систем управления */
+  --1c-yellow: #ffcc00;      /* Акценты и предупреждения */
+  --bg-industrial: #f0f4f7;  /* Цвет фона "конструкторского бюро" */
+  --border-grey: #cbd5e0;    /* Цвет рамок таблиц и форм */
+  --text-dark: #1a202c;      /* Основной текст */
   
-  /* Цвета статусов  */
-  --status-new: #e3f2fd;      /* Светло-синий */
-  --status-process: #fff3e0;  /* Песочный */
-  --status-done: #e8f5e9;     /* Светло-зеленый */
-  --status-error: #ffebee;    /* Бледный красный */
+  /* Цвета статус-гейтов из твоей БД */
+  --st-new: #ebf8ff;         /* Новая */
+  --st-process: #fffaf0;     /* В расчете */
+  --st-verify: #faf5ff;      /* Верификация */
+  --st-done: #f0fff4;        /* Завершено */
 }
 
+/* 2. БАЗОВЫЕ НАСТРОЙКИ ОБЛИКА */
 body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-industrial);
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-main);
+  color: var(--text-dark);
 }
 
-/* --- LAYOUT (Оболочка) --- */
-.layout-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
+/* 3. ШАПКА И ФУТЕР (LAYOUT) */
 .app-header {
-  background-color: var(--1c-blue);
+  background: var(--1c-blue);
   color: white;
-  padding: 10px 20px;
-  border-bottom: 3px solid var(--1c-yellow);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.app-header h1 {
-  margin: 0;
-  font-size: 1.2rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.layout-main {
-  padding: 20px;
-  max-width: 1200px;
+.header-content {
+  max-width: 1400px;
   margin: 0 auto;
-  width: 100%;
-}
-
-/* --- ROLE TOOLBAR (RBAC Визуализация) --- */
-.role-toolbar {
-  background: white;
-  padding: 10px 15px;
-  margin-bottom: 15px;
-  border: 1px solid var(--border-grey);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.role-toolbar button {
-  background: var(--1c-yellow);
-  border: 1px solid #999;
-  padding: 5px 12px;
-  cursor: pointer;
-  font-weight: bold;
+.app-footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.85rem;
+  color: #718096;
 }
 
-/* --- ENGINEERING FORM  --- */
-.add-form {
-  background: white;
+/* 4. РАБОЧЕЕ ПРОСТРАНСТВО (WORKSPACE) */
+.workspace {
+  max-width: 1400px;
+  margin: 0 auto;
   padding: 20px;
-  border: 1px solid var(--border-grey);
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  box-sizing: border-box;
+}
+
+/* Панель переключения ролей */
+.role-toolbar {
+  display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-.add-form input, .add-form select {
-  padding: 8px;
-  border: 1px solid var(--border-grey);
-  font-size: 0.9rem;
-}
-
-.add-form button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  font-weight: bold;
+.role-toolbar button {
+  padding: 8px 16px;
+  border: 1px solid var(--1c-blue);
+  background: white;
+  color: var(--1c-blue);
   cursor: pointer;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: 0.2s;
 }
 
-/* --- РЕЕСТР ТАБЛИЦА (ПОЧЕМУ table? Это стандарт для инженерных данных) --- */
+.role-toolbar button.active {
+  background: var(--1c-blue);
+  color: white;
+}
+
+/* 5. ИНЖЕНЕРНАЯ ФОРМА (ADDTASKFORM) */
+.engineering-form {
+  background: white;
+  padding: 25px;
+  border: 1px solid var(--border-grey);
+  border-top: 5px solid var(--1c-blue);
+  border-radius: 4px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+/* 6. СЕКЦИЯ ДАШБОРДОВ (DASHBOARD) */
+.dashboard-section {
+  background: white;
+  border: 1px solid var(--border-grey);
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 30px;
+}
+
+.dash-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.chart-item h4 {
+  text-align: center;
+  color: var(--1c-blue);
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+}
+
+/* 7. РЕЕСТР (ТАБЛИЦА) - ДЛЯ ПЭВМ */
 .registry-table {
   width: 100%;
-  border-collapse: collapse; /* Убирает двойные линии, создавая строгий вид */
+  border-collapse: collapse;
   background: white;
-  font-size: 0.9rem;
+  border: 1px solid var(--border-grey);
 }
 
 .registry-table th {
-  background-color: #e9ecef;
-  border: 1px solid var(--border-grey);
-  padding: 12px 10px;
-  text-align: left;
+  background: #edf2f7;
   color: var(--1c-blue);
+  padding: 12px;
+  text-align: left;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  border: 1px solid var(--border-grey);
 }
 
 .registry-table td {
+  padding: 12px;
   border: 1px solid var(--border-grey);
-  padding: 10px;
-  vertical-align: middle;
+  font-size: 0.95rem;
 }
 
-/* Стилизация строк по статусу */
-.status-новая { background-color: var(--status-new); }
-.status-в\ расчете { background-color: var(--status-process); }
-.status-завершено { background-color: var(--status-done); }
+/* Цветовая маркировка строк */
+.st-новая { background-color: var(--st-new); }
+.st-в-расчете { background-color: var(--st-process); }
+.st-верификация { background-color: var(--st-verify); }
+.st-завершено { background-color: var(--st-done); }
 
-.model-meta {
-  font-size: 0.75rem;
-  color: #666;
-  margin-top: 4px;
+/* 8. МОБИЛЬНАЯ АДАПТАЦИЯ (Responsive) */
+@media (max-width: 1024px) {
+  /* Таблица превращается в карточки */
+  .registry-table thead { display: none; }
+  
+  .t-row {
+    display: block;
+    margin-bottom: 15px;
+    border: 2px solid var(--1c-blue);
+    border-radius: 8px;
+    background: white !important;
+  }
+  
+  .t-row td {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border: none;
+    border-bottom: 1px solid #edf2f7;
+  }
+  
+  .t-row td::before {
+    content: attr(data-label); /* Вывод заголовка из HTML-атрибута */
+    font-weight: bold;
+    color: var(--1c-blue);
+    font-size: 0.8rem;
+  }
 }
 
-/* --- АЛЕРТЫ --- */
+/* 9. ВСПОМОГАТЕЛЬНЫЕ ЭЛЕМЕНТЫ */
 .offline-alert {
-  background: #fff3cd;
-  color: #856404;
+  background: #e53e3e;
+  color: white;
   text-align: center;
   padding: 8px;
   font-weight: bold;
-  border-bottom: 1px solid #ffeeba;
+  font-size: 0.9rem;
 }
 
-.del-btn {
-  color: #d32f2f;
-  background: none;
-  border: 1px solid #d32f2f;
-  border-radius: 3px;
+.btn-del {
+  background: #fed7d7;
+  color: #c53030;
+  border: none;
+  padding: 5px 10px;
   cursor: pointer;
-  padding: 2px 6px;
+  border-radius: 3px;
 }
 
-.del-btn:hover {
-  background: #d32f2f;
-  color: white;
-}
+.btn-del:hover { background: #feb2b2; }
+
+.id-tag { color: #718096; font-size: 0.75rem; font-family: monospace; }

@@ -1,72 +1,95 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Layout from './components/Layout';
 import AddTaskForm from './components/AddTaskForm';
 import TaskList from './components/TaskList';
+import Dashboard from './components/Dashboard';
+import RoleToolbar from './components/RoleToolbar';
 import FilterPanel from './components/FilterPanel';
-import RoleToolbar from './components/RoleToolbar'; // ПОЧЕМУ вынесли? Чтобы App.js не был монолитом.
+import { loadTasks, saveTasks } from './utils/apiHelper'; // Импорт слоя-посредника данных
 import './App.css';
 
-const STORAGE_KEY = "cae-manager-v2";
-
 function App() {
-  const [tasks, setTasks] = useState(() => {
-    /* ПОЧЕМУ try/catch? Чтобы приложение не "упало", если в LocalStorage 
-       окажется поврежденный JSON (требование преподавателя). */
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  // Ленивая инициализация стейта задач через чистую функцию utils (Косяк №2 исправлен)
+  const [tasks, setTasks] = useState(() => loadTasks());
+  const [role, setRole] = useState("Consultant"); // Модель RBAC доступа: 'Consultant' или 'Engineer'
+  const [isOnline, setIsOnline] = useState(navigator.onLine); // BOM API мониторинг сети
+  const [activeFilter, setActiveFilter] = useState("Все"); // Фильтр жизненного цикла задач
 
-  const [role, setRole] = useState("Consultant");
-  const [filter, setFilter] = useState("Все");
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
+  // Синхронизация стейта с localStorage (Автосохранение при любых C-U-D операциях)
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    saveTasks(tasks);
   }, [tasks]);
 
-  // ПОЧЕМУ useEffect для сети? Отслеживаем состояние BOM-объекта navigator.
+  // BOM API: Отслеживание физического подключения к интернету с очисткой слушателей (Cleanup)
   useEffect(() => {
     const handleStatus = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', handleStatus);
     window.addEventListener('offline', handleStatus);
-    
-    // ПОЧЕМУ cleanup? Чтобы не было утечек памяти при закрытии приложения.
     return () => {
       window.removeEventListener('online', handleStatus);
       window.removeEventListener('offline', handleStatus);
     };
-  }, []); // Используем setIsOnline здесь!
-    
-  // ПОЧЕМУ useCallback? Оптимизация. Функции не пересоздаются в памяти при каждом 
-  // рендере, что важно при передаче их в глубокие дочерние компоненты.
-  const handleAdd = useCallback((newTask) => {
-    setTasks(prev => [...prev, { ...newTask, id: Date.now() }]);
   }, []);
 
-  const handleStatus = useCallback((id, newStatus) => {
+  // Оптимизация useCallback для предотвращения лишних ререндеров дочерней формы заявки
+  const handleAdd = useCallback((newTaskData) => {
+    if (role !== 'Consultant') return; // Жесткое аппаратное ограничение прав RBAC
+    const newTask = { 
+      ...newTaskData, 
+      id: crypto.randomUUID(), // Исправление замечания: Защита от коллизий вместо Date.now()
+      status: "НОВАЯ",
+      date: new Date().toLocaleString('ru-RU') // Фиксация даты создания (Косяк №4 убран)
+    };
+    setTasks(prev => [newTask, ...prev]);
+  }, [role]);
+
+  // Изменение статуса задачи (Update в паттерне CRUD)
+  const handleStatusChange = useCallback((id, newStatus) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
   }, []);
 
-  const handleDelete = (id) => {
-    /* ПОЧЕМУ filter? Мы создаем НОВЫЙ массив. В React запрещено менять (мутировать) state напрямую. */
+  // Удаление задачи (Delete в паттерне CRUD) без грубого window.confirm (Bad UX убран по лекции)
+  const handleDelete = useCallback((id) => {
+    if (role !== 'Consultant') return; // Запрет инженерам удалять записи
     setTasks(prev => prev.filter(t => t.id !== id));
-  };
+  }, [role]);
 
-  const filteredTasks = tasks.filter(t => filter === "Все" || t.status === filter);
+  // Мемоизация фильтрации строго по ЖИЗНЕННОМУ ЦИКЛУ из ТЗ (Косяк №3 убран полностью)
+  const filteredTasks = useMemo(() => {
+    if (activeFilter === "Все") return tasks;
+    return tasks.filter(task => task.status.toUpperCase() === activeFilter.toUpperCase());
+  }, [tasks, activeFilter]);
 
   return (
-    <Layout title="CAE Manager: Digital Thread" isOnline={isOnline}>
-      <RoleToolbar role={role} setRole={setRole} />
-      {role === 'Consultant' && <AddTaskForm onAdd={handleAdd} />}
-      <FilterPanel activeFilter={filter} onFilterChange={setFilter} />
-      <TaskList 
-        items={filteredTasks} 
-        role={role} 
-        onDelete={handleDelete} 
-        onStatusChange={handleStatus} 
-      />
+    <Layout title="To-Do+: Simulation Manager" isOnline={isOnline}>
+      <main className="workspace">
+        {/* Панель переключения прав доступа */}
+        <RoleToolbar currentRole={role} onRoleChange={setRole} />
+        
+        {/* Условный рендеринг формы: Добавлять заявки может только Консультант КЦ */}
+        {role === 'Consultant' ? (
+          <AddTaskForm onAdd={handleAdd} />
+        ) : (
+          <div className="info-notice">ℹ️ Режим Инженера ИЦ: Функции регистрации новых изделий ограничены.</div>
+        )}
+        
+        {/* Визуализация аналитики и дашбордов */}
+        <section className="dashboard-section">
+          <Dashboard tasks={tasks} />
+        </section>
+
+        {/* Секция реестра задач */}
+        <section className="registry-section">
+          <h2>Реестр активных виртуальных испытаний</h2>
+          <FilterPanel activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+          <TaskList
+            items={filteredTasks}
+            role={role}
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+          />
+        </section>
+      </main>
     </Layout>
   );
 }

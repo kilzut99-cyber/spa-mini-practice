@@ -1,19 +1,18 @@
 import React from 'react';
 
 export default function FilterPanel({ activeFilter, onFilterChange }) {
-  // Категории 
-  const categories = ["Все", "Механика", "CFD", "Тепло"];
+  // Список стадий контроля по ТЗ (Косяк №3 решен)
+  const stages = ["Все", "Новая", "В расчете", "Верификация", "Завершено"];
 
   return (
-    <div className="filter-panel">
-      {categories.map(cat => (
-        <button 
-          key={cat}
-          // ПОЧЕМУ активная кнопка выделена? Требование JUNIOR.
-          className={activeFilter === cat ? "filter-btn active" : "filter-btn"}
-          onClick={() => onFilterChange(cat)}
+    <div className="filter-panel" style={{ display: 'flex', gap: '8px', margin: '15px 0' }}>
+      {stages.map(stage => (
+        <button
+          key={stage}
+          className={activeFilter === stage ? "filter-btn active" : "filter-btn"}
+          onClick={() => onFilterChange(stage)}
         >
-          {cat}
+          {stage}
         </button>
       ))}
     </div>

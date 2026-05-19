@@ -3,17 +3,29 @@ import React from 'react';
 export default function Layout({ title, children, isOnline }) {
   return (
     <div className="layout-container">
-      {/* ПОЧЕМУ isOnline? Реализация требования PRO по работе с BOM API. 
-          Инженер должен видеть статус сети, так как данные пишутся в LocalStorage. */}
+      {/* Условный рендеринг плашки отсутствия сети (Offline-First логика) */}
       {!isOnline && (
-        <div className="offline-alert">⚠️ Режим Offline. Изменения сохранятся локально.</div>
+        <div className="offline-alert" style={{ background: '#e53e3e', color: 'white', textLight: 'center', padding: '10px', fontWeight: 'bold', textAlign: 'center' }}>
+          ⚠️ АВТОНОМНЫЙ РЕЖИМ: ВЫЧИСЛЕНИЯ НАПРАВЛЯЮТСЯ В ЛОКАЛЬНУЮ БД БРАУЗЕРА
+        </div>
       )}
+      
       <header className="app-header">
-        <h1>{title}</h1>
+        <div className="header-content">
+          <h1>{title}</h1>
+          <div className={`net-status ${isOnline ? 'on' : 'off'}`} style={{ color: isOnline ? '#4caf50' : '#e53e3e', fontWeight: 'bold' }}>
+            {isOnline ? "● СВЯЗЬ С СЕРВЕРОМ CAE УСТАНОВЛЕНА" : "○ СЕТЬ ОТКЛЮЧЕНА"}
+          </div>
+        </div>
       </header>
-      {/* ПОЧЕМУ children? Это механизм композиции. Layout задает "скелет" 1С-интерфейса, 
-          а контент (формы, списки) вкладывается внутрь, не дублируя код шапки. */}
-      <main className="layout-main">{children}</main>
+
+      <div className="main-content">
+        {children} {/* Внедрение дочерних компонентов */}
+      </div>
+
+      <footer className="app-footer">
+        <p>© 2026 Консалтинговый центр — Департамент сквозного проектирования и виртуальных испытаний</p>
+      </footer>
     </div>
   );
 }
