@@ -6,14 +6,19 @@
  * @returns {Object} Результаты расчетов и протокол статуса верификации
  */
 export const runEngineeringSimulation = (category, lod, rawValue = 150) => {
-  // Имитируем влияние детализации сетки (LOD) на погрешность вычислений (High LOD точнее)
+  // Оборачиваем входящее значение в модуль для корректного учета сил сжатия
+  const validRawValue = Math.abs(rawValue);
+
+  // Имитируем влияние детализации сетки (LOD) на погрешность вычислений
+  // Для механики и тепла: консервативное завышение нагрузок при грубой сетке
+  // Для CFD: при Low LOD скорость потока корректируется с учетом турбулентных пульсаций
   const meshMultiplier = lod === 'High' ? 1.02 : lod === 'Medium' ? 1.12 : 1.35;
-  const calculatedValue = Number((rawValue * meshMultiplier).toFixed(2));
   
-  let safetyFactor = 0; // Коэффициент запаса
-  let limit = 0;        // Предельно допустимое значение для металла
-  let label = '';       // Физическое наименование критерия
-  
+  let calculatedValue = Number((validRawValue * meshMultiplier).toFixed(2));
+  let safetyFactor = 0; 
+  let limit = 0; 
+  let label = ''; 
+
   switch (category) {
     case 'Механика':
       limit = 250; // Предел текучести конструкционной стали (МПа)
@@ -27,6 +32,9 @@ export const runEngineeringSimulation = (category, lod, rawValue = 150) => {
       break;
     case 'CFD':
       limit = 40; // Максимальная критическая скорость потока газа/жидкости (м/с)
+      // КОРРЕКЦИЯ CFD-МОДЕЛИ: Высокий LOD дает наиболее точную оценку пиковой скорости
+      const cfdMultiplier = lod === 'High' ? 1.00 : lod === 'Medium' ? 0.90 : 0.75;
+      calculatedValue = Number((validRawValue * cfdMultiplier).toFixed(2));
       safetyFactor = Number((limit / (calculatedValue || 1)).toFixed(2));
       label = 'Гидродинамическая стабильность';
       break;
@@ -36,7 +44,7 @@ export const runEngineeringSimulation = (category, lod, rawValue = 150) => {
       label = 'Общий запас';
   }
 
-  // Критерий успешного прохождения теста Консалтингового Центра (нормативный запас >= 1.2)
+  // Нормативный критерий Консалтингового Центра (запас >= 1.2)
   const isPassed = safetyFactor >= 1.2;
 
   return {
@@ -44,6 +52,6 @@ export const runEngineeringSimulation = (category, lod, rawValue = 150) => {
     limit,
     safetyFactor,
     label,
-    resultStatus: isPassed ? 'success' : 'failed' // 'success' = зеленая галочка, 'failed' = брак
+    resultStatus: isPassed ? 'success' : 'failed'
   };
 };

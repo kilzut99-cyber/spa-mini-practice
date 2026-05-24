@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default function FilterPanel({ activeFilter, onFilterChange }) {
-  // Список стадий контроля по ТЗ (Косяк №3 решен)
+  // Список стадий контроля по ТЗ 
   const stages = ["Все", "Новая", "В расчете", "Верификация", "Завершено"];
 
   return (

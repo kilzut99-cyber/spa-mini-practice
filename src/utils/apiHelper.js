@@ -1,37 +1,45 @@
-const STORAGE_KEY = "cae_manager_final_v3"; // Уникальный ключ версии БД в браузере
+// Константный ключ версионирования локальной СУБД в памяти браузера
+const STORAGE_KEY = "cae_manager_final_v3"; 
 
 /**
- * Безопасное чтение массива задач из localStorage сtry/catch защитой от поврежденного JSON
- * @returns {Array} Массив сохраненных задач или пустой массив при ошибке
+ * Безопасное извлечение массива задач из localStorage с try/catch защитой от синтаксических повреждений JSON
+ * @returns {Array} Массив десериализованных инженерных задач или пустой массив при ошибке
  */
 export const loadTasks = () => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : []; // Восстановление сложной структуры данных
+    // Восстановление сложной иерархической структуры данных при ее наличии
+    return saved ? JSON.parse(saved) : []; 
   } catch (error) {
+    // Изоляция синтаксической ошибки для предотвращения аварийного падения всего SPA-приложения
     console.error("Ошибка парсинга localStorage БД:", error);
-    return []; // Защита от аварийного падения SPA
+    return []; 
   }
 };
 
 /**
- * Сохранение (зеркалирование) массива задач в локальное хранилище браузера
- * @param {Array} tasks - Текущий массив задач из реактивного стейта
+ * Сериализация и зеркалирование реактивного состояния в локальное хранилище браузера
+ * @param {Array} tasks - Текущий массив инженерных задач из стейта оркестратора
  */
 export const saveTasks = (tasks) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); // Сериализация в JSON строку
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); 
   } catch (error) {
     console.error("Ошибка записи в localStorage БД:", error);
   }
 };
 
 /**
- * Генерация безопасного шифра (хэша) задачи для маркировки изделия без коллизий
- * @returns {string} Строка уникального шифра в формате GEO-XXXX-XX
+ * Генерация безопасного промышленного шифра (хэша) геометрии изделия без рисков возникновения коллизий.
+ * Полностью заменяет устаревший метод на базе временных штампов миллисекунд.
+ * 
+ * @returns {string} Строка уникального буквенно-цифрового шифра в формате GEO-XXXX-XX
  */
 export const generateGeoHash = () => {
-  const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase(); // 4 случайных символа
-  const timestampShort = Date.now().toString().slice(-2); // Последние 2 цифры текущего времени
-  return `GEO-${randomStr}-${timestampShort}`;
+  // Вырезаем 4 случайных символа из стартового сегмента криптографического UUID
+  const randomStr = crypto.randomUUID().substring(0, 4).toUpperCase();
+  // Вырезаем 2 дополнительных контрольных символа из финального сегмента UUID для усиления энтропии
+  const saltShort = crypto.randomUUID().substring(24, 26).toUpperCase();
+  
+  return `GEO-${randomStr}-${saltShort}`;
 };
