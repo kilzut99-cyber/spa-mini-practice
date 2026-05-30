@@ -87,10 +87,32 @@ body {
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+/* Новая сетка строки формы под 6 элементов с защитой от деструктивного сжатия контента */
 .form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  /* Автоматическая генерация колонок: ячейка перенесется ниже, если её ширина упадет меньше 180px */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px; /* Умеренный технологический зазор между компонентами ввода */
+  align-items: center;
+}
+
+/* Стилизация внутренних полей ввода и селекторов формы */
+.form-row input,
+.form-row select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-grey);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+/* Изолированные адаптивные правила для селекторов для предотвращения наложения стрелок выбора на длинный текст */
+.form-row select {
+  padding-right: 28px;       /* Защитный зазор справа для навигационной стрелки */
+  text-overflow: ellipsis;   /* Сжатие выходящих названий («High LOD...») с помощью троеточия */
+  white-space: nowrap;       /* Строгий запрет деструктивного переноса слов на новую строку */
+  overflow: hidden;          /* Обрезка выходящего за рамки рамки текста */
 }
 
 /* 6. СЕКЦИЯ ДАШБОРДОВ (DASHBOARD) */
@@ -146,6 +168,47 @@ body {
 .st-в-расчете { background-color: var(--st-process); }
 .st-верификация { background-color: var(--st-verify); }
 .st-завершено { background-color: var(--st-done); }
+
+/* --- СТИЛИЗАЦИЯ ПАНЕЛИ СКВОЗНОГО ПОИСКА, СОРТИРОВКИ И ФИЛЬТРАЦИИ --- */
+
+.filter-panel-container {
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Базовое состояние кнопок переключения PLM-стадий */
+.filter-btn {
+  padding: 6px 14px;
+  background-color: #f7fafc;
+  border: 1px solid var(--border-grey);
+  border-radius: 4px;
+  color: #4a5568;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Ховер-эффект при наведении курсора на кнопку стадии */
+.filter-btn:hover {
+  background-color: #edf2f7;
+  color: var(--1c-blue);
+}
+
+/* Подсветка активной кнопки при совпадении с выбранным гейтом фильтрации */
+.filter-btn.active {
+  background-color: var(--1c-blue);
+  border-color: var(--1c-blue);
+  color: white;
+}
+
+/* Стилизация текстового инпута поиска и селектора при фокусе (клике) */
+.filter-panel-container input:focus,
+.filter-panel-container select:focus {
+  outline: none;
+  border-color: var(--1c-blue);
+  box-shadow: 0 0 0 3px rgba(0, 84, 165, 0.15); /* Мягкое синее свечение */
+}
 
 /* 8. МОБИЛЬНАЯ АДАПТАЦИЯ (Responsive) */
 @media (max-width: 1024px) {

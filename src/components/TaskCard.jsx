@@ -1,92 +1,127 @@
-// Импортируем фундаментальную библиотеку React для работы с JSX-разметкой
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { runEngineeringSimulation } from '../utils/cartCalc';
 
-// Выполняем импорт чистой математической функции для симуляции физических нагрузок изделий
-import { runEngineeringSimulation } from '../utils/cartCalc'; 
+export default function TaskCard({ id, title, category, lod, priority, loadValue, deadline, status, geoHash, role, date, onDelete, onStatusChange, onUpdateTask }) {
+  // Локальный флаг для переключения строки из режима отображения в режим редактирования (Update CRUD)
+  const [isEditing, setIsEditing] = useState(false);
+  // Локальный буфер состояния для аккумулирования отредактированных полей перед фиксацией в глобальном App.js
+  const [editData, setEditData] = useState({ title, category, lod, priority, loadValue, deadline });
 
-// Экспортируем по умолчанию функциональный компонент строки таблицы, принимающий деструктурированные пропсы
-export default function TaskCard({ id, title, category, lod, priority, deadline, status, geoHash, role, date, onDelete, onStatusChange }) {
-  
-  // Инициализируем виртуальный датчик нагрузки на основе длины строкового имени тестируемого объекта машиностроения
-  const mockSensorValue = title.length * 7; 
-  
-  // Запускаем физико-математический расчет CAE-ядра, вычисляющий пиковые значения и нормативные запасы прочности
-  const calculation = runEngineeringSimulation(category || 'Механика', lod || 'Medium', mockSensorValue);
+  /**
+   * КРИТИЧЕСКАЯ ОПТИМИЗАЦИЯ ПРОИЗВОДИТЕЛЬНОСТИ ЧЕРЕЗ ИЗОЛИРОВАННЫЙ useMemo
+   * Устранение замечания - "Вызов физических формул без мемоизации при каждом ререндере строки".
+   * Вычисления запускаются только тогда, когда изменяются физические параметры конкретной детали.
+   */
+  const calculation = useMemo(() => {
+    // Передача реального числового параметра loadValue вместо старой искусственной метрики длины текста строки
+    return runEngineeringSimulation(category, lod, loadValue || 100);
+  }, [category, lod, loadValue]);
 
-  // Производим изолированный расчет финансовой стоимости (SLA) на основе плотности КЭ-сетки и приоритета срочности
-  const financialCost = lod === 'High' ? 2200 : priority === 'High' ? 1425 : 950;
+  // Мемоизация вычисления стоимости SLA для разгрузки процессора при частых обновлениях интерфейса
+  const financialCost = useMemo(() => {
+    return lod === 'High' ? 2200 : priority === 'High' ? 1425 : 950;
+  }, [lod, priority]);
+
+  // Функция сохранения отредактированного буфера данных наверх к "источнику истины"
+  const handleSave = () => {
+    onUpdateTask(id, editData);
+    setIsEditing(false); // Выход из режима редактирования
+  };
+
+  // Реализация безопасного удаления данных (Устранение замечания  - "Отсутствие подтверждения удаления")
+  const handleDeleteConfirm = () => {
+    if (window.confirm(`Вы уверены, что хотите безвозвратно удалить протокол испытания #${id.slice(0, 6)}?`)) {
+      onDelete(id);
+    }
+  };
+
+  // ОТРИСОВКА ИНТЕРФЕЙСА В РЕЖИМЕ РЕДАКТИРОВАНИЯ (ИНЛАЙН-ФОРМА UPDATE)
+  if (isEditing) {
+    return (
+      <tr className="t-row editing-row">
+        <td data-label="ID / ШИФР"><span className="id-tag">#{id.slice(0, 6)}</span></td>
+        {/* Инпуты связаны с локальным буфером editData (Controlled Inputs паттерн) */}
+        <td data-label="Объект"><input type="text" value={editData.title} onChange={e => setEditData({...editData, title: e.target.value})} /></td>
+        <td data-label="Физика">
+          <select value={editData.category} onChange={e => setEditData({...editData, category: e.target.value})}>
+            <option value="Mechanics">Mechanics</option>
+            <option value="CFD">CFD</option>
+            <option value="Thermal">Thermal</option>
+          </select>
+        </td>
+        <td data-label="Сетка">
+          <select value={editData.lod} onChange={e => setEditData({...editData, lod: e.target.value})}>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </td>
+        <td data-label="Приоритет">
+          <select value={editData.priority} onChange={e => setEditData({...editData, priority: e.target.value})}>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </td>
+        <td data-label="Нагрузка"><input type="number" style={{width: '60px'}} value={editData.loadValue} onChange={e => setEditData({...editData, loadValue: Number(e.target.value)})} /></td>
+        <td data-label="Дедлайн"><input type="date" value={editData.deadline} onChange={e => setEditData({...editData, deadline: e.target.value})} /></td>
+        <td colSpan="3">
+          <button className="btn-save" onClick={handleSave}>Сохранить</button>
+          <button className="btn-cancel" onClick={() => setIsEditing(false)}>Отмена</button>
+        </td>
+      </tr>
+    );
+  }
+
+  // Генерация динамического CSS-класса на основе статуса задачи для стилизации строки через CSS-переменные
+  const statusClass = `st-${status.toLowerCase().replace(" ", "-")}`;
 
   return (
-    // Формируем контейнер строки таблицы, динамически меняющий цвет фона на основе вердикта ОТК (Успех/Брак)
-    <tr className="t-row" style={{ backgroundColor: calculation.resultStatus === 'success' ? '#f0fff4' : '#fff5f5' }}>
+    // Динамическая окраска бэкграунда строки таблицы в зависимости от вердикта ОТК (Успех/Брак) математического ядра
+    <tr className={`t-row ${statusClass}`} style={{ backgroundColor: calculation.resultStatus === 'success' ? 'var(--st-done)' : '#fff5f5' }}>
       
-      {/* Ячейка вывода уникальных идентификаторов задачи с атрибутом data-label для мобильной CSS-трансформации */}
+      {/* Использование data-label атрибутов для реализации адаптивной магии бесшовной трансформации в мобильные карточки */}
       <td data-label="ID / ШИФР">
-        {/* Отображаем сокращенный 6-значный хэш уникального криптографического ключа UUID */}
-        <div className="id-min" style={{ fontFamily: 'monospace' }}>#{id.slice(0, 6)}</div>
-        {/* Выводим буквенно-цифровой шифр изделия, сформированный по регламенту Консалтингового центра */}
-        <code className="geo-tag" style={{ fontSize: '0.8rem', color: '#0054a5' }}>{geoHash}</code>
+        <div className="id-tag">#{id.slice(0, 6)}</div>
+        <code className="geo-tag">{geoHash}</code>
       </td>
-      
-      {/* Ячейка вывода наименования объекта машиностроения с поддержкой полужирного начертания шрифта */}
       <td data-label="Объект"><strong>{title}</strong></td>
-      
-      {/* Ячейка вывода физической дисциплины CAE-анализа (Механика, Гидродинамика или Теплофизика) */}
-      <td data-label="Физика">{category || 'Механика'}</td>
-      
-      {/* Ячейка вывода текущего уровня детализации конечно-элементной сетки FEM (Low, Medium, High LOD) */}
+      <td data-label="Физика">{category}</td>
       <td data-label="Детализация">{lod}</td>
-
-      {/* СИНХРОНИЗАЦИЯ: Новая ячейка для вывода приоритета задачи, устраняющая логическое смещение колонок влево */}
-      <td data-label="Приоритет" style={{ fontStyle: 'italic', color: '#4a5568' }}>
-        {/* Отображаем приоритет срочности (Low, Medium, High), используя дефолтное значение при его отсутствии */}
-        {priority || 'Medium'}
-      </td>
-      
-      {/* СИНХРОНИЗАЦИЯ: Выделенная финансовая колонка, отображающая чистую стоимость выполнения симуляции */}
-      <td data-label="Стоимость" style={{ fontWeight: 'bold', color: '#2d3748' }}>
-        {/* Выводим рассчитанный бюджет SLA в долларах США */}
-        {financialCost} $
-      </td>
-      
-      {/* СИНХРОНИЗАЦИЯ: Выделенная инженерная колонка, выводящая обособленные физические результаты расчетов */}
-      <td data-label="Результаты расчетов" style={{ fontSize: '0.85rem', lineHeight: '1.3' }}>
-        {/* Отображаем пиковую вычисленную нагрузку и нормативный предел текучести/деформации материала */}
+      <td data-label="Приоритет"><em>{priority}</em></td>
+      <td data-label="Стоимость" style={{fontWeight: 'bold'}}>{financialCost} $</td>
+      <td data-label="Результаты расчетов">
         <div>Пик: <strong>{calculation.calculatedValue}</strong> (Порог: {calculation.limit})</div>
-        {/* Выводим наименование запаса и его коэффициент, окрашивая текст в зеленый или красный цвет по результатам ОТК */}
+        {/* Реактивное окрашивание шрифта физического запаса по условию ОТК */}
         <div style={{ color: calculation.resultStatus === 'success' ? '#4caf50' : '#e53e3e', fontWeight: 'bold' }}>
           {calculation.label}: {calculation.safetyFactor}
         </div>
       </td>
-      
-      {/* Ячейка вывода временных рамок контроля выполнения задачи (Дедлайн) */}
       <td data-label="Дедлайн">
-        {/* Выводим установленную дату завершения виртуального CAE-испытания */}
         <div>До: {deadline}</div>
-        {/* Устранение замечания о мертвом коде: проп date успешно задействован для вывода даты регистрации */}
-        <small style={{ color: '#718096', fontSize: '0.75rem' }}>Зарегистрировано: {date}</small>
+        <small style={{color: '#718096', fontSize: '0.7rem'}}>Создан: {date}</small>
       </td>
-      
-      {/* Ячейка вывода и интерактивного управления стадиями жизненного цикла инженерной задачи */}
       <td data-label="Статус">
-        {/* Реализация ролевого доступа RBAC: селект аппаратно блокируется (disabled) для роли Инженера ИЦ */}
+        {/* Реализация ролевой безопасности RBAC: селект аппаратно блокируется для роли рядового Инженера */}
         <select value={status} onChange={(e) => onStatusChange(id, e.target.value)} disabled={role === 'Engineer'}>
-          {/* Интегрируем доступные стадии контроля, закрепленные за Консалтинговым центром */}
           <option value="НОВАЯ">Новая</option>
           <option value="В РАСЧЕТЕ">В расчете</option>
           <option value="ВЕРИФИКАЦИЯ">Верификация</option>
           <option value="ЗАВЕРШЕНО">Завершено</option>
         </select>
       </td>
-      
-      {/* Ячейка вывода элементов деструктивного удаления записей из реестра */}
       <td>
-        {/* Реализация ролевого доступа RBAC: кнопка удаления '✕' рендерится исключительно для Консультанта КЦ */}
-        {role === 'Consultant' && (
-          <button className="btn-del" onClick={() => onDelete(id)}>✕</button>
-        )}
+        <div style={{display: 'flex', gap: '4px'}}>
+          {/* Условный рендеринг кнопок деструктивных действий: инженерам запрещено редактировать и удалять данные */}
+          {role === 'Consultant' && (
+            <>
+              {/* Кнопка переключения строки в интерактивный инлайн-режим правки полей */}
+              <button className="btn-edit" onClick={() => { setEditData({ title, category, lod, priority, loadValue, deadline }); setIsEditing(true); }}>✍️</button>
+              <button className="btn-del" onClick={handleDeleteConfirm}>✕</button>
+            </>
+          )}
+        </div>
       </td>
-      
     </tr>
   );
 }
